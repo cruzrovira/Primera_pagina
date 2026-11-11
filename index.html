@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arme su página HTML</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Un solo mundo visual: el azul noche de la infografía «Misión: mi primera página web», con el editor de código como pieza central. */
+:root {
+  --bg: #0E1830;
+  --panel: #16233F;
+  --panel-2: #1C2C4D;
+  --editor: #0A1224;
+  --ink: #EAF0FA;
+  --muted: #9DAACB;
+  --line: #2A3B60;
+  --cyan: #38C6E6;
+  --orange: #FF8A3D;
+  --green: #36D68A;
+  --red: #FF5E6E;
+  --yellow: #FFD45C;
+  --tag: #6CB6FF;
+  --attr: #9CDCFE;
+  --value: #F0A47A;
+  --font-body: "Lexend", "Segoe UI", system-ui, sans-serif;
+  --font-code: "JetBrains Mono", Consolas, "Courier New", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  padding: 24px 16px 48px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 20px; }
+
+header { display: grid; gap: 10px; }
+.eyebrow {
+  justify-self: start;
+  background: var(--orange); color: #1A1206;
+  font-weight: 700; font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 6px;
+}
+h1 { margin: 0; font-size: clamp(26px, 4vw, 38px); line-height: 1.15; text-wrap: balance; }
+h1 .hl { color: var(--cyan); }
+.intro { margin: 0; color: var(--muted); max-width: 68ch; }
+.intro b { color: var(--ink); font-weight: 600; }
+
+.howto {
+  display: flex; flex-wrap: wrap; gap: 8px 18px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+  padding: 12px 16px; font-size: 14px; color: var(--muted);
+}
+.howto span { display: flex; align-items: center; gap: 8px; }
+.howto .n {
+  width: 22px; height: 22px; border-radius: 50%; flex: none;
+  display: grid; place-items: center;
+  background: var(--panel-2); color: var(--cyan); font-weight: 700; font-size: 12px;
+}
+.howto .warn { color: var(--yellow); }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+/* Editor */
+.editor { background: var(--editor); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.editor-top {
+  display: flex; align-items: center; gap: 12px;
+  background: #0D1830; border-bottom: 1px solid var(--line); padding: 10px 14px;
+}
+.dots { display: flex; gap: 6px; }
+.dots i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+.dots i:nth-child(1) { background: #FF5F57; } .dots i:nth-child(2) { background: #FEBC2E; } .dots i:nth-child(3) { background: #28C840; }
+.file-tab {
+  font-family: var(--font-code); font-size: 13px; color: var(--ink);
+  background: var(--editor); border: 1px solid var(--line); border-bottom-color: var(--editor);
+  border-radius: 8px 8px 0 0; padding: 4px 12px; margin-bottom: -11px;
+}
+.code { padding: 14px 0; overflow-x: auto; font-family: var(--font-code); font-size: 15px; }
+.ln { display: flex; align-items: center; min-height: 44px; padding-right: 16px; }
+.ln:hover { background: rgba(255,255,255,.02); }
+.num { width: 44px; flex: none; text-align: right; padding-right: 16px; color: #4A5B80; font-size: 13px; user-select: none; font-variant-numeric: tabular-nums; }
+.content { display: flex; align-items: center; flex-wrap: nowrap; gap: 2px; white-space: pre; }
+.indent { display: inline-block; }
+.txt { color: var(--ink); padding: 0 2px; }
+
+.slot {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 92px; min-height: 34px; padding: 2px;
+  border: 2px dashed #3A4E7A; border-radius: 8px; background: rgba(56,198,230,.04);
+  font: inherit; color: var(--muted); cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.slot:empty::before { content: "· · ·"; color: #4A5B80; font-size: 12px; letter-spacing: .1em; }
+.slot.filled { border-style: solid; border-color: transparent; background: transparent; padding: 0; }
+.slot.over, .slot.target { border-color: var(--cyan); border-style: solid; background: rgba(56,198,230,.14); }
+.slot.ok { border: 2px solid var(--green); background: rgba(54,214,138,.10); padding: 1px; }
+.slot.bad { border: 2px solid var(--red); background: rgba(255,94,110,.12); padding: 1px; animation: shake .35s; }
+.slot:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+
+/* Piezas */
+.piece {
+  display: inline-flex; align-items: center;
+  font-family: var(--font-code); font-size: 15px; font-weight: 500;
+  background: var(--panel-2); border: 1px solid #34487A; border-radius: 7px;
+  padding: 5px 10px; color: var(--ink); cursor: grab; touch-action: none; user-select: none;
+  box-shadow: 0 2px 0 #0A1224; white-space: pre;
+}
+.piece:hover { border-color: var(--cyan); }
+.piece:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.piece.selected { border-color: var(--yellow); box-shadow: 0 0 0 3px rgba(255,212,92,.35); }
+.piece.locked { cursor: default; border-color: transparent; background: transparent; box-shadow: none; }
+.piece.ghost-src { opacity: .3; }
+.ghost { position: fixed; z-index: 50; pointer-events: none; transform: translate(-50%, -50%) rotate(-2deg); box-shadow: 0 10px 24px rgba(0,0,0,.45); border-color: var(--cyan); }
+.t-br { color: #7A8BB0; } .t-name { color: var(--tag); } .t-attr { color: var(--attr); } .t-val { color: var(--value); } .t-doc { color: #C586C0; }
+
+/* Panel lateral */
+aside { display: grid; gap: 16px; position: sticky; top: 16px; }
+@media (max-width: 860px) { aside { position: static; } }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.card h2 { margin: 0 0 4px; font-size: 17px; }
+.card .sub { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+.bank {
+  display: flex; flex-wrap: wrap; gap: 10px; min-height: 120px;
+  padding: 12px; border: 2px dashed transparent; border-radius: 10px; background: rgba(0,0,0,.18);
+}
+.bank.over { border-color: var(--cyan); }
+.bank-empty { color: var(--muted); font-size: 14px; align-self: center; }
+
+.score-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--muted); }
+.score-row b { color: var(--ink); font-size: 22px; font-variant-numeric: tabular-nums; }
+.bar { height: 10px; background: var(--panel-2); border-radius: 99px; overflow: hidden; margin: 10px 0 14px; }
+.bar i { display: block; height: 100%; width: 0; background: var(--cyan); border-radius: 99px; transition: width .4s; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+button.btn {
+  font: inherit; font-weight: 600; font-size: 15px; border-radius: 10px; padding: 10px 18px; cursor: pointer; border: 0;
+}
+.btn.primary { background: var(--orange); color: #1A1206; flex: 1; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost-btn { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn.ghost-btn:hover { border-color: var(--muted); }
+.btn:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+
+/* Retroalimentación */
+.feedback { display: grid; gap: 10px; }
+.fb-head { display: flex; gap: 10px; align-items: flex-start; }
+.fb-head .icon { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 700; color: #0A1224; }
+.fb-head p { margin: 0; }
+.fb-head strong { display: block; font-size: 16px; }
+.fb-head span { font-size: 14px; color: var(--muted); }
+.fb-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.fb-list li { background: var(--panel-2); border-left: 4px solid var(--red); border-radius: 8px; padding: 9px 12px; font-size: 14px; }
+.fb-list li.empty { border-left-color: var(--yellow); }
+.fb-list .where { font-weight: 600; color: var(--ink); }
+.fb-list .hint { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; }
+.fb-list code, .feedback code, .intro code { font-family: var(--font-code); font-size: .92em; color: var(--value); }
+.idle { font-size: 14px; color: var(--muted); margin: 0; }
+
+/* Éxito */
+.success { display: none; }
+.success.show { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; }
+@media (max-width: 860px) { .success.show { grid-template-columns: 1fr; } }
+.success h2 { margin: 0 0 6px; font-size: 24px; color: var(--green); }
+.success p { margin: 0 0 10px; color: var(--muted); max-width: 52ch; }
+.success .q { background: var(--panel-2); border-left: 4px solid var(--yellow); border-radius: 8px; padding: 10px 14px; color: var(--ink); }
+.browser { background: #fff; border-radius: 10px; overflow: hidden; color: #111; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.b-top { background: #E8EAEE; padding: 8px 10px 0; display: grid; gap: 6px; }
+.b-tab { justify-self: start; background: #fff; border-radius: 8px 8px 0 0; padding: 5px 14px; font-size: 13px; font-family: Arial, sans-serif; }
+.b-url { background: #fff; border-radius: 99px; padding: 4px 12px; font-size: 12px; color: #555; font-family: Arial, sans-serif; margin-bottom: 8px; }
+.b-page { padding: 18px 22px 22px; font-family: "Times New Roman", serif; }
+.b-page h3 { font-size: 30px; margin: 0 0 10px; }
+.b-page p { margin: 0 0 12px; font-size: 16px; }
+.b-img { width: 180px; height: 110px; border-radius: 4px; background: #DDE6F3; display: grid; place-items: center; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Práctica en vivo · Introducción a HTML</div>
+    <h1>Arme su primera página: <span class="hl">cada etiqueta en su lugar</span></h1>
+    <p class="intro">Ya estudió la infografía y el video de la misión. Ahora demuestre lo que sabe: arrastre cada etiqueta al espacio correcto del archivo <code>index.html</code> y presione <b>Revisar</b>. La herramienta le dirá qué está bien y qué debe mejorar.</p>
+    <div class="howto" aria-label="Cómo se usa">
+      <span><i class="n">1</i>Arrastre una etiqueta a un espacio vacío.</span>
+      <span><i class="n">2</i>En celular: toque la etiqueta y luego el espacio.</span>
+      <span><i class="n">3</i>Para quitarla, devuélvala al banco.</span>
+      <span class="warn"><i class="n">!</i>Ojo: en el banco hay una etiqueta que sobra.</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="editor" aria-label="Editor de código">
+      <div class="editor-top">
+        <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="file-tab">index.html</div>
+      </div>
+      <div class="code" id="code"></div>
+    </section>
+
+    <aside>
+      <div class="card">
+        <h2>Banco de etiquetas</h2>
+        <p class="sub">Apertura, cierre y etiquetas sin cierre, todas revueltas.</p>
+        <div class="bank" id="bank" aria-label="Banco de etiquetas"></div>
+      </div>
+
+      <div class="card">
+        <div class="score-row">
+          <span>Etiquetas correctas</span>
+          <span><b id="score">0</b> / <span id="total">15</span></span>
+        </div>
+        <div class="bar"><i id="bar"></i></div>
+        <div class="actions">
+          <button class="btn primary" id="check" type="button">Revisar</button>
+          <button class="btn ghost-btn" id="reset" type="button">Empezar de nuevo</button>
+        </div>
+      </div>
+
+      <div class="card feedback" id="feedback" aria-live="polite">
+        <p class="idle">Cuando termine de colocar las etiquetas, presione <b>Revisar</b> para recibir su retroalimentación.</p>
+      </div>
+    </aside>
+  </div>
+
+  <section class="card success" id="success" aria-live="polite">
+    <div>
+      <h2>¡Misión cumplida!</h2>
+      <p id="successText">Colocó las 15 etiquetas en su lugar.</p>
+      <p class="q"><b>Pregunta de cierre:</b> Un compañero olvidó escribir <code>&lt;/h1&gt;</code> y ahora el párrafo de su página también sale grande, como si fuera título. ¿Por qué el error de una sola línea cambió también la línea de abajo? Explique qué entiende el navegador cuando una etiqueta no se cierra y qué haría usted para encontrar el error sin ver el código de su compañero. Responda con sus propias palabras en Classroom.</p>
+      <div class="actions"><button class="btn ghost-btn" id="again" type="button">Practicar otra vez</button></div>
+    </div>
+    <div class="browser" aria-label="Así se ve su página en el navegador">
+      <div class="b-top">
+        <div class="b-tab">Mi página</div>
+        <div class="b-url">file:///C:/mi-pagina/index.html</div>
+      </div>
+      <div class="b-page">
+        <h3>¡Hola, mundo!</h3>
+        <p>Esta es mi primera página web.</p>
+        <div class="b-img" role="img" aria-label="Descripción de mi imagen">
+          <svg width="70" height="48" viewBox="0 0 70 48" aria-hidden="true"><circle cx="52" cy="12" r="7" fill="#F2C14E"/><path d="M0 48 L22 18 L38 38 L48 28 L70 48 Z" fill="#6E8BB8"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  // Piezas: kind = open | close | single
+  const PIECES = {
+    doctype: { text: '<!DOCTYPE html>', name: 'doctype', kind: 'single' },
+    html:    { text: '<html lang="es">', name: 'html', kind: 'open' },
+    chtml:   { text: '</html>', name: 'html', kind: 'close' },
+    head:    { text: '<head>', name: 'head', kind: 'open' },
+    chead:   { text: '</head>', name: 'head', kind: 'close' },
+    meta:    { text: '<meta charset="UTF-8">', name: 'meta', kind: 'single' },
+    title:   { text: '<title>', name: 'title', kind: 'open' },
+    ctitle:  { text: '</title>', name: 'title', kind: 'close' },
+    body:    { text: '<body>', name: 'body', kind: 'open' },
+    cbody:   { text: '</body>', name: 'body', kind: 'close' },
+    h1:      { text: '<h1>', name: 'h1', kind: 'open' },
+    ch1:     { text: '</h1>', name: 'h1', kind: 'close' },
+    p:       { text: '<p>', name: 'p', kind: 'open' },
+    cp:      { text: '</p>', name: 'p', kind: 'close' },
+    img:     { text: '<img src="foto.jpg" alt="Descripción de mi imagen">', name: 'img', kind: 'single' },
+    cimg:    { text: '</img>', name: 'img', kind: 'close', fake: true }
+  };
+
+  // Espacios: pieza esperada, línea y pista (sin revelar la respuesta)
+  const SLOTS = [
+    { exp: 'doctype', line: 1,  hint: 'La primera línea le avisa al navegador que el documento es HTML5.' },
+    { exp: 'html',    line: 2,  hint: 'Aquí empieza todo el documento, y se indica que está en español.' },
+    { exp: 'head',    line: 3,  hint: 'Aquí se abre la sección con la información que no se ve en la página.' },
+    { exp: 'meta',    line: 4,  hint: 'Esta línea hace que se vean bien las tildes y la ñ.' },
+    { exp: 'title',   line: 5,  hint: 'Aquí se abre el texto que aparece en la pestaña del navegador.' },
+    { exp: 'ctitle',  line: 5,  hint: 'Aquí se cierra el texto de la pestaña.' },
+    { exp: 'chead',   line: 6,  hint: 'Aquí se cierra la sección de información que no se ve.' },
+    { exp: 'body',    line: 7,  hint: 'Aquí se abre la sección de todo lo que sí se ve en la página.' },
+    { exp: 'h1',      line: 8,  hint: 'Aquí se abre el título principal.' },
+    { exp: 'ch1',     line: 8,  hint: 'Aquí se cierra el título principal.' },
+    { exp: 'p',       line: 9,  hint: 'Aquí se abre el párrafo.' },
+    { exp: 'cp',      line: 9,  hint: 'Aquí se cierra el párrafo.' },
+    { exp: 'img',     line: 10, hint: 'Aquí va la imagen, con su archivo y su texto alternativo.' },
+    { exp: 'cbody',   line: 11, hint: 'Aquí se cierra la sección de lo que se ve.' },
+    { exp: 'chtml',   line: 12, hint: 'Aquí se cierra todo el documento.' }
+  ];
+
+  // Líneas del archivo: espacios (número) y texto fijo (cadena)
+  const LINES = [
+    { ind: 0, parts: [0] },
+    { ind: 0, parts: [1] },
+    { ind: 2, parts: [2] },
+    { ind: 4, parts: [3] },
+    { ind: 4, parts: [4, 'Mi página', 5] },
+    { ind: 2, parts: [6] },
+    { ind: 2, parts: [7] },
+    { ind: 4, parts: [8, '¡Hola, mundo!', 9] },
+    { ind: 4, parts: [10, 'Esta es mi primera página web.', 11] },
+    { ind: 4, parts: [12] },
+    { ind: 2, parts: [13] },
+    { ind: 0, parts: [14] }
+  ];
+
+  const HEAD_SLOTS = [3, 4, 5];
+  const BODY_SLOTS = [8, 9, 10, 11, 12];
+
+  let placement, bank, locked, marks, selected, attempts, checkedOnce;
+
+  const $code = document.getElementById('code');
+  const $bank = document.getElementById('bank');
+  const $fb = document.getElementById('feedback');
+  const $score = document.getElementById('score');
+  const $bar = document.getElementById('bar');
+  const $success = document.getElementById('success');
+  document.getElementById('total').textContent = SLOTS.length;
+
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+
+  function start() {
+    placement = SLOTS.map(() => null);
+    bank = shuffle(Object.keys(PIECES));
+    locked = new Set();
+    marks = {};
+    selected = null;
+    attempts = 0;
+    checkedOnce = false;
+    $success.classList.remove('show');
+    $fb.innerHTML = '<p class="idle">Cuando termine de colocar las etiquetas, presione <b>Revisar</b> para recibir su retroalimentación.</p>';
+    render();
+  }
+
+  // Colorea la etiqueta como en VS Code
+  function paint(el, text) {
+    const add = (t, c) => { const s = document.createElement('span'); s.className = c; s.textContent = t; el.appendChild(s); };
+    if (text.startsWith('<!')) { add('<!', 't-br'); add('DOCTYPE', 't-doc'); add(' html', 't-attr'); add('>', 't-br'); return; }
+    const m = text.match(/^<(\/?)([a-z0-9]+)(.*?)>$/i);
+    add('<' + m[1], 't-br'); add(m[2], 't-name');
+    const re = /\s+([a-z-]+)="([^"]*)"/gi; let a;
+    while ((a = re.exec(m[3]))) { add(' ' + a[1], 't-attr'); add('=', 't-br'); add('"' + a[2] + '"', 't-val'); }
+    add('>', 't-br');
+  }
+
+  function pieceEl(id) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'piece';
+    b.dataset.id = id;
+    paint(b, PIECES[id].text);
+    b.setAttribute('aria-label', 'Etiqueta ' + PIECES[id].text);
+    if (selected === id) b.classList.add('selected');
+    return b;
+  }
+
+  function render() {
+    $code.innerHTML = '';
+    LINES.forEach((ln, i) => {
+      const row = document.createElement('div'); row.className = 'ln';
+      const n = document.createElement('span'); n.className = 'num'; n.textContent = i + 1; row.appendChild(n);
+      const c = document.createElement('div'); c.className = 'content';
+      if (ln.ind) { const sp = document.createElement('span'); sp.className = 'indent'; sp.textContent = ' '.repeat(ln.ind); c.appendChild(sp); }
+      ln.parts.forEach(part => {
+        if (typeof part === 'string') { const t = document.createElement('span'); t.className = 'txt'; t.textContent = part; c.appendChild(t); return; }
+        const s = document.createElement('div');
+        s.className = 'slot';
+        s.dataset.slot = part;
+        s.tabIndex = 0;
+        s.setAttribute('role', 'button');
+        s.setAttribute('aria-label', 'Espacio de la línea ' + SLOTS[part].line);
+        const pid = placement[part];
+        if (pid) {
+          s.classList.add('filled');
+          const p = pieceEl(pid);
+          if (locked.has(part)) { p.classList.add('locked'); p.disabled = true; }
+          s.appendChild(p);
+        }
+        if (marks[part]) s.classList.add(marks[part]);
+        if (selected && !pid && !locked.has(part)) s.classList.add('target');
+        c.appendChild(s);
+      });
+      row.appendChild(c);
+      $code.appendChild(row);
+    });
+
+    $bank.innerHTML = '';
+    if (!bank.length) { const e = document.createElement('span'); e.className = 'bank-empty'; e.textContent = 'El banco está vacío.'; $bank.appendChild(e); }
+    bank.forEach(id => $bank.appendChild(pieceEl(id)));
+
+    const correct = SLOTS.filter((s, i) => placement[i] === s.exp).length;
+    const shown = checkedOnce ? locked.size : 0;
+    $score.textContent = shown;
+    $bar.style.width = (shown / SLOTS.length * 100) + '%';
+  }
+
+  function whereIs(id) {
+    const i = placement.indexOf(id);
+    return i >= 0 ? i : 'bank';
+  }
+
+  function changed() {
+    if (checkedOnce) {
+      Object.keys(marks).forEach(k => { if (marks[k] === 'bad') delete marks[k]; });
+      const list = $fb.querySelector('.fb-list');
+      if (list) {
+        let note = $fb.querySelector('.changed');
+        if (!note) { note = document.createElement('p'); note.className = 'idle changed'; note.textContent = 'Hizo cambios. Presione Revisar otra vez para ver cómo va.'; $fb.appendChild(note); }
+      }
+    }
+  }
+
+  function place(id, slot) {
+    if (locked.has(slot)) return;
+    const from = whereIs(id);
+    if (from === slot) return;
+    const occupant = placement[slot];
+    placement[slot] = id;
+    if (from === 'bank') {
+      bank.splice(bank.indexOf(id), 1);
+      if (occupant) bank.push(occupant);
+    } else {
+      placement[from] = occupant;
+    }
+    selected = null;
+    changed();
+    render();
+  }
+
+  function toBank(id) {
+    const from = whereIs(id);
+    if (from === 'bank' || locked.has(from)) { selected = null; render(); return; }
+    placement[from] = null;
+    bank.push(id);
+    selected = null;
+    changed();
+    render();
+  }
+
+  // ---------- Retroalimentación ----------
+  const code = t => '<code>' + t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code>';
+
+  function diagnose(i) {
+    const s = SLOTS[i], P = PIECES[placement[i]], E = PIECES[s.exp];
+    if (P.fake) return code('</img>') + ' no existe: ' + code('<img>') + ' es una etiqueta sin cierre. Devuelva ' + code('</img>') + ' al banco.';
+    if (P.name === E.name && P.kind !== E.kind) return 'Usó ' + code('<' + E.name + '>') + ' y ' + code('</' + E.name + '>') + ' al revés. La de apertura va primero; la de cierre lleva ' + code('/') + ' y va al final.';
+    if ((P.name === 'meta' || P.name === 'title') && BODY_SLOTS.includes(i)) return code(P.text) + ' va dentro de ' + code('<head>') + ': es información de la página que no se ve en pantalla.';
+    if (['h1', 'p', 'img'].includes(P.name) && HEAD_SLOTS.includes(i)) return code(P.text) + ' se ve en la pantalla, por eso va dentro de ' + code('<body>') + ', no de ' + code('<head>') + '.';
+    if (E.kind === 'close' && ['head', 'body', 'html'].includes(E.name) && P.kind === 'close' && ['head', 'body', 'html'].includes(P.name)) return 'Revise el orden de cierre: lo último que se abre es lo primero que se cierra.';
+    if (E.kind === 'open' && P.kind === 'close') return 'Aquí se abre algo, pero colocó una etiqueta de cierre (' + code(P.text) + ').';
+    if (E.kind === 'close' && P.kind === 'open') return 'Aquí se cierra algo, pero colocó una etiqueta de apertura (' + code(P.text) + ').';
+    if (E.kind === 'single' && P.kind !== 'single') return 'Este espacio necesita una etiqueta completa que no lleva cierre.';
+    return code(P.text) + ' no va en este lugar.';
+  }
+
+  function check() {
+    attempts++;
+    checkedOnce = true;
+    marks = {};
+    const wrong = [], empty = [];
+    SLOTS.forEach((s, i) => {
+      if (placement[i] === s.exp) { locked.add(i); marks[i] = 'ok'; }
+      else if (placement[i] == null) empty.push(i);
+      else { wrong.push(i); marks[i] = 'bad'; }
+    });
+    selected = null;
+    render();
+
+    const ok = locked.size, total = SLOTS.length;
+    if (ok === total) { showSuccess(); return; }
+
+    let head, sub, color;
+    if (ok >= 11) { head = '¡Va muy bien!'; color = 'var(--cyan)'; }
+    else if (ok >= 6) { head = 'Va por buen camino.'; color = 'var(--yellow)'; }
+    else { head = 'Siga intentando: repase la infografía.'; color = 'var(--orange)'; }
+    sub = ok + ' de ' + total + ' etiquetas en su lugar · intento ' + attempts + '. Las correctas quedaron fijas en verde.';
+
+    let html = '<div class="fb-head"><span class="icon" style="background:' + color + '">' + ok + '</span><p><strong>' + head + '</strong><span>' + sub + '</span></p></div>';
+    html += '<ul class="fb-list">';
+    const seen = new Set();
+    wrong.sort((a, b) => a - b).forEach(i => {
+      const msg = diagnose(i);
+      const key = SLOTS[i].line + '|' + msg;
+      if (seen.has(key)) return;
+      seen.add(key);
+      html += '<li><span class="where">Línea ' + SLOTS[i].line + ':</span> ' + msg + '<span class="hint">Pista: ' + SLOTS[i].hint + '</span></li>';
+    });
+    if (empty.length) {
+      const lines = [...new Set(empty.map(i => SLOTS[i].line))].join(', ');
+      html += '<li class="empty"><span class="where">Faltan ' + empty.length + (empty.length === 1 ? ' etiqueta' : ' etiquetas') + '</span> por colocar (línea' + (lines.includes(',') ? 's ' : ' ') + lines + ').<span class="hint">Recuerde: toda etiqueta que se abre, también se cierra.</span></li>';
+    }
+    html += '</ul>';
+    $fb.innerHTML = html;
+  }
+
+  function showSuccess() {
+    $fb.innerHTML = '<div class="fb-head"><span class="icon" style="background:var(--green)">✓</span><p><strong>¡Todas las etiquetas están en su lugar!</strong><span>Mire abajo cómo se ve su página en el navegador.</span></p></div>';
+    document.getElementById('successText').textContent = 'Colocó las ' + SLOTS.length + ' etiquetas en su lugar en ' + attempts + (attempts === 1 ? ' intento' : ' intentos') + ' y dejó fuera la que sobraba. Así se ve su código en el navegador:';
+    $success.classList.add('show');
+    $success.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  // ---------- Arrastrar y soltar (mouse y táctil) + tocar para colocar ----------
+  let drag = null;
+
+  document.addEventListener('pointerdown', e => {
+    const p = e.target.closest('.piece');
+    if (!p || p.disabled) return;
+    drag = { id: p.dataset.id, x: e.clientX, y: e.clientY, el: p, moving: false, ghost: null, over: null };
+  });
+
+  document.addEventListener('pointermove', e => {
+    if (!drag) return;
+    if (!drag.moving) {
+      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+      drag.moving = true;
+      selected = null;
+      drag.ghost = drag.el.cloneNode(true);
+      drag.ghost.classList.add('ghost');
+      drag.ghost.classList.remove('selected');
+      document.body.appendChild(drag.ghost);
+      drag.el.classList.add('ghost-src');
+    }
+    e.preventDefault();
+    drag.ghost.style.left = e.clientX + 'px';
+    drag.ghost.style.top = e.clientY + 'px';
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const tgt = under && (under.closest('.slot') || under.closest('#bank'));
+    if (drag.over && drag.over !== tgt) drag.over.classList.remove('over');
+    if (tgt && !(tgt.dataset.slot && locked.has(+tgt.dataset.slot))) { tgt.classList.add('over'); drag.over = tgt; } else drag.over = null;
+  }, { passive: false });
+
+  document.addEventListener('pointerup', e => {
+    if (!drag) return;
+    const d = drag; drag = null;
+    if (!d.moving) return; // fue un toque: lo maneja el clic
+    d.ghost.remove();
+    d.el.classList.remove('ghost-src');
+    if (d.over) d.over.classList.remove('over');
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const slot = under && under.closest('.slot');
+    if (slot) place(d.id, +slot.dataset.slot);
+    else if (under && under.closest('#bank')) toBank(d.id);
+    else render();
+    d.suppressClick = true;
+    suppressNextClick = true;
+  });
+
+  document.addEventListener('pointercancel', () => {
+    if (drag && drag.ghost) { drag.ghost.remove(); drag.el.classList.remove('ghost-src'); }
+    drag = null; render();
+  });
+
+  let suppressNextClick = false;
+  document.addEventListener('click', e => {
+    if (suppressNextClick) { suppressNextClick = false; return; }
+    const p = e.target.closest('.piece');
+    const slot = e.target.closest('.slot');
+    const inBank = e.target.closest('#bank');
+    if (p && !p.disabled) {
+      const id = p.dataset.id;
+      // Si hay una pieza seleccionada y se toca otra dentro de un espacio, se intercambian
+      if (selected && selected !== id && slot) { place(selected, +slot.dataset.slot); return; }
+      if (selected && selected !== id && inBank) { toBank(selected); return; }
+      selected = selected === id ? null : id;
+      render();
+      return;
+    }
+    if (slot && selected) { place(selected, +slot.dataset.slot); return; }
+    if (inBank && selected) { toBank(selected); return; }
+  });
+
+  document.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('slot')) {
+      e.preventDefault();
+      if (selected) place(selected, +e.target.dataset.slot);
+    }
+    if (e.key === 'Escape' && selected) { selected = null; render(); }
+  });
+
+  document.getElementById('check').addEventListener('click', check);
+  document.getElementById('reset').addEventListener('click', start);
+  document.getElementById('again').addEventListener('click', () => { start(); window.scrollTo({ top: 0 }); });
+
+  start();
+})();
+</script>
+</body>
+</html>
